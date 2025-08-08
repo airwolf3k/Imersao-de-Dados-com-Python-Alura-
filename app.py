@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -78,8 +77,7 @@ with col_graf1:
             y='cargo',
             orientation='h',
             title="Top 10 cargos por salário médio",
-            labels={'usd': "Média Salarial Anual (USD)", 'cargo': ''},
-            color='cargo'
+            labels={'usd': "Média Salarial Anual (USD)", 'cargo': ''}
         )
         grafico_cargos.update_layout(title_x=0.1, yaxis={'categoryorder':'total ascending'})
         st.plotly_chart(grafico_cargos, use_container_width=True)
