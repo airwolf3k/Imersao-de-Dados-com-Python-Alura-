@@ -57,9 +57,9 @@ st.sidebar.header("🔍 Filtros")
 anos_disponiveis = sorted(df['Ano'].unique())
 anos_selecionados = st.sidebar.multiselect("Ano", anos_disponiveis, default=anos_disponiveis)
 
-# Filtro de Senioridade
+# Filtro de Experiencia
 senioridades_disponiveis = sorted(df['Experiencia'].unique())
-senioridades_selecionadas = st.sidebar.multiselect("Senioridade", senioridades_disponiveis, default=senioridades_disponiveis)
+senioridades_selecionadas = st.sidebar.multiselect("Experiencia", senioridades_disponiveis, default=senioridades_disponiveis)
 
 # Filtro por Tipo de Contrato
 contratos_disponiveis = sorted(df['Contrato'].unique())
@@ -119,7 +119,7 @@ with col_graf1:
             y='Cargo',
             orientation='h',
             title="Top 10 Cargos por Salário Médio",
-            labels={'USD': "Média Salarial Anual (USD)", 'cargo': ''},
+            labels={'USD': "Média Salarial Anual (USD)", 'Cargo': ''},
             color='Cargo',
             color_discrete_sequence=cores_personalizadas
         )
