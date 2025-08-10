@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
+import numpy as np
+from scipy import stats
 
 # --- Configuração da Página ---
 st.set_page_config(
@@ -19,24 +22,24 @@ st.markdown("""
         color: white !important;
         border-color: #1f77b4 !important;
     }
-
+    
     /* Mudando cor dos botões X dos tags */
     .stMultiSelect > div > div > div > div > span {
         color: white !important;
     }
-
+    
     /* Mantendo o fundo da caixa de seleção escuro */
     .stMultiSelect > div > div {
         background-color: transparent !important;
     }
-
+    
     /* Estilo para o título principal */
     .main-title {
         color: #1f77b4;
         text-align: center;
         font-weight: bold;
     }
-
+    
     /* Estilo para métricas - adaptado para tema escuro */
     [data-testid="metric-container"] {
         background-color: rgba(28, 131, 225, 0.1);
@@ -82,7 +85,7 @@ st.markdown('<h1 class="main-title">🎲 Dashboard de Análise de Salários na �
 st.markdown("Explore os dados salariais na área de dados nos últimos anos. Utilize os filtros à esquerda para refinar sua análise.")
 
 # --- Métricas Principais (KPIs) ---
-st.subheader("Métricas Gerais (Salário Anual em USD)")
+st.subheader("Métricas gerais (Salário anual em USD)")
 
 if not df_filtrado.empty:
     salario_medio = df_filtrado['usd'].mean()
@@ -108,21 +111,21 @@ col_graf1, col_graf2 = st.columns(2)
 with col_graf1:
     if not df_filtrado.empty:
         top_cargos = df_filtrado.groupby('cargo')['usd'].mean().nlargest(10).sort_values(ascending=True).reset_index()
-
+        
         # Paleta de cores personalizada para o gráfico de barras
         cores_personalizadas = px.colors.qualitative.Set3
-
+        
         grafico_cargos = px.bar(
             top_cargos,
             x='usd',
             y='cargo',
             orientation='h',
-            title="Top 10 Cargos por Salário Médio",
+            title="Top 10 cargos por salário médio",
             labels={'usd': "Média Salarial Anual (USD)", 'cargo': ''},
             color='cargo',
             color_discrete_sequence=cores_personalizadas
         )
-
+        
         # Melhorando o layout
         grafico_cargos.update_layout(
             title_x=0.1,
@@ -131,32 +134,65 @@ with col_graf1:
             plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
             paper_bgcolor='rgba(0,0,0,0)'
         )
-
+        
         # Personalizando as barras
         grafico_cargos.update_traces(
             hovertemplate='<b>%{y}</b><br>Salário Médio: $%{x:,.0f}<extra></extra>',
             textposition='none'
         )
-
+        
         st.plotly_chart(grafico_cargos, use_container_width=True)
     else:
         st.warning("Nenhum dado para exibir no gráfico de cargos.")
 
 with col_graf2:
     if not df_filtrado.empty:
+        import plotly.graph_objects as go
+        from plotly.subplots import make_subplots
+        import numpy as np
+        from scipy import stats
+        
+        # Criar o histograma
         grafico_hist = px.histogram(
             df_filtrado,
             x='usd',
             nbins=30,
             title="Distribuição de Salários Anuais",
             labels={'usd': "Faixa Salarial (USD)", 'count': "Frequência"},
-            color_discrete_sequence=['#1f77b4']  # Azul consistente
+            color_discrete_sequence=['#1f77b4']
         )
+        
+        # Adicionar curva de densidade (equivalente ao kde=True)
+        x_min, x_max = df_filtrado['usd'].min(), df_filtrado['usd'].max()
+        x_range = np.linspace(x_min, x_max, 100)
+        
+        # Calcular a densidade kernel
+        kde = stats.gaussian_kde(df_filtrado['usd'])
+        density = kde(x_range)
+        
+        # Escalar a densidade para ficar proporcional ao histograma
+        hist_max = max([trace.y.max() for trace in grafico_hist.data])
+        density_scaled = density * hist_max / density.max()
+        
+        # Adicionar a curva de densidade
+        grafico_hist.add_trace(
+            go.Scatter(
+                x=x_range,
+                y=density_scaled,
+                mode='lines',
+                name='Curva de Densidade',
+                line=dict(color='red', width=3),
+                yaxis='y'
+            )
+        )
+        
         grafico_hist.update_layout(
             title_x=0.1,
             plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)'
+            paper_bgcolor='rgba(0,0,0,0)',
+            showlegend=True
         )
+        
         st.plotly_chart(grafico_hist, use_container_width=True)
     else:
         st.warning("Nenhum dado para exibir no gráfico de distribuição.")
@@ -167,15 +203,15 @@ with col_graf3:
     if not df_filtrado.empty:
         remoto_contagem = df_filtrado['remoto'].value_counts().reset_index()
         remoto_contagem.columns = ['tipo_trabalho', 'quantidade']
-
+        
         # Cores personalizadas para o gráfico de pizza
         cores_pizza = ['#1f77b4', '#ff7f0e', '#2ca02c']
-
+        
         grafico_remoto = px.pie(
             remoto_contagem,
             names='tipo_trabalho',
             values='quantidade',
-            title='Proporção dos Tipos de Trabalho',
+            title='Proporção dos tipos de trabalho',
             hole=0.5,
             color_discrete_sequence=cores_pizza
         )
@@ -198,7 +234,7 @@ with col_graf4:
                 media_ds_pais,
                 locations='residencia_iso3',
                 color='usd',
-                color_continuous_scale='rdylgn',  # Aqui se muda a paleta de cores do gráfico
+                color_continuous_scale='rdylgn',  # Volta à cor original
                 title="Salário Médio de Cientista de Dados por País",
                 labels={'usd': "Salário Médio Anual (USD)", 'residencia_iso3': "País"}
             )
