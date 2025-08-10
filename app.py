@@ -117,7 +117,7 @@ with col_graf1:
             x='usd',
             y='cargo',
             orientation='h',
-            title="Top 10 Cargos por Salário Médio",
+            title="Top 10 cargos por salário médio",
             labels={'usd': "Média Salarial Anual (USD)", 'cargo': ''},
             color='cargo',
             color_discrete_sequence=cores_personalizadas
@@ -144,21 +144,20 @@ with col_graf1:
 
 with col_graf2:
     if not df_filtrado.empty:
-        # Criar o histograma
         grafico_hist = px.histogram(
             df_filtrado,
             x='usd',
             nbins=30,
             title="Distribuição de Salários Anuais",
             labels={'usd': "Faixa Salarial (USD)", 'count': "Frequência"},
-            color_discrete_sequence=['#1f77b4']
-        )               
+            color_discrete_sequence=['#1f77b4']  # Azul consistente
+        )
         grafico_hist.update_layout(
             title_x=0.1,
             plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            showlegend=True
+            paper_bgcolor='rgba(0,0,0,0)'
         )
+        st.plotly_chart(grafico_hist, use_container_width=True)
     else:
         st.warning("Nenhum dado para exibir no gráfico de distribuição!")
 
@@ -220,3 +219,4 @@ st.dataframe(df_filtrado, use_container_width=True)
 # --- Tabela de Dados Detalhados ---
 st.subheader("Dados Detalhados")
 st.dataframe(df_filtrado, use_container_width=True)
+
