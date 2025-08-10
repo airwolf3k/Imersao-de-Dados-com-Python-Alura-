@@ -36,7 +36,7 @@ tamanhos_selecionados = st.sidebar.multiselect("Tamanho da Empresa", tamanhos_di
 # O dataframe principal é filtrado com base nas seleções feitas na barra lateral.
 df_filtrado = df[
     (df['Ano'].isin(anos_selecionados)) &
-    (df['Experiência'].isin(senioridades_selecionadas)) &
+    (df['Experiencia'].isin(senioridades_selecionadas)) &
     (df['Contrato'].isin(contratos_selecionados)) &
     (df['Tamanho_Empresa'].isin(tamanhos_selecionados))
 ]
@@ -137,3 +137,4 @@ with col_graf4:
 # --- Tabela de Dados Detalhados ---
 st.subheader("Dados Detalhados")
 st.dataframe(df_filtrado)
+# The End
