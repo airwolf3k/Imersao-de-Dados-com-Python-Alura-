@@ -111,19 +111,20 @@ with col_graf1:
         
         # Paleta de cores personalizada para o gráfico de barras
         cores_personalizadas = px.colors.qualitative.Set3
-        
+
+        # Criando o gráfico
         grafico_cargos = px.bar(
             top_cargos,
             x='usd',
             y='cargo',
             orientation='h',
-            title="Top 10 cargos por salário médio",
+            title="Top 10 Cargos por Salário Médio",
             labels={'usd': "Média Salarial Anual (USD)", 'cargo': ''},
             color='cargo',
             color_discrete_sequence=cores_personalizadas
         )
         
-        # Melhorando o layout
+        # Layout do gráfico
         grafico_cargos.update_layout(
             title_x=0.1,
             yaxis={'categoryorder':'total ascending'},
@@ -170,12 +171,13 @@ with col_graf3:
         
         # Cores personalizadas para o gráfico de pizza
         cores_pizza = ['#1f77b4', '#ff7f0e', '#2ca02c']
-        
+
+        # Criando o gráfico de pizza
         grafico_remoto = px.pie(
             remoto_contagem,
             names='tipo_trabalho',
             values='quantidade',
-            title='Proporção dos tipos de trabalho',
+            title='Proporção dos Tipos de Trabalho',
             hole=0.5,
             color_discrete_sequence=cores_pizza
         )
@@ -194,6 +196,8 @@ with col_graf4:
         df_ds = df_filtrado[df_filtrado['cargo'] == 'Data Scientist']
         if not df_ds.empty:
             media_ds_pais = df_ds.groupby('residencia_iso3')['usd'].mean().reset_index()
+
+            # Criando o gráfico países
             grafico_paises = px.choropleth(
                 media_ds_pais,
                 locations='residencia_iso3',
@@ -215,3 +219,4 @@ with col_graf4:
 # --- Tabela de Dados Detalhados ---
 st.subheader("Dados Detalhados")
 st.dataframe(df_filtrado, use_container_width=True)
+# The End
