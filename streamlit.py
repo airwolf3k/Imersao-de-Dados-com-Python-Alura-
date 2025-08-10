@@ -1,9 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
-import numpy as np
-from scipy import stats
 
 # --- Configuração da Página ---
 st.set_page_config(
@@ -85,7 +82,7 @@ st.markdown('<h1 class="main-title">🎲 Dashboard de Análise de Salários na �
 st.markdown("Explore os dados salariais na área de dados nos últimos anos. Utilize os filtros à esquerda para refinar sua análise.")
 
 # --- Métricas Principais (KPIs) ---
-st.subheader("Métricas gerais (Salário anual em USD)")
+st.subheader("Métricas Gerais (Salário Anual em USD)")
 
 if not df_filtrado.empty:
     salario_medio = df_filtrado['usd'].mean()
@@ -143,59 +140,26 @@ with col_graf1:
         
         st.plotly_chart(grafico_cargos, use_container_width=True)
     else:
-        st.warning("Nenhum dado para exibir no gráfico de cargos.")
+        st.warning("Nenhum dado para exibir no gráfico de cargos!")
 
 with col_graf2:
     if not df_filtrado.empty:
-        import plotly.graph_objects as go
-        from plotly.subplots import make_subplots
-        import numpy as np
-        from scipy import stats
-        
-        # Criar o histograma
         grafico_hist = px.histogram(
             df_filtrado,
             x='usd',
             nbins=30,
             title="Distribuição de Salários Anuais",
             labels={'usd': "Faixa Salarial (USD)", 'count': "Frequência"},
-            color_discrete_sequence=['#1f77b4']
+            color_discrete_sequence=['#1f77b4']  # Azul consistente
         )
-        
-        # Adicionar curva de densidade (equivalente ao kde=True)
-        x_min, x_max = df_filtrado['usd'].min(), df_filtrado['usd'].max()
-        x_range = np.linspace(x_min, x_max, 100)
-        
-        # Calcular a densidade kernel
-        kde = stats.gaussian_kde(df_filtrado['usd'])
-        density = kde(x_range)
-        
-        # Escalar a densidade para ficar proporcional ao histograma
-        hist_max = max([trace.y.max() for trace in grafico_hist.data])
-        density_scaled = density * hist_max / density.max()
-        
-        # Adicionar a curva de densidade
-        grafico_hist.add_trace(
-            go.Scatter(
-                x=x_range,
-                y=density_scaled,
-                mode='lines',
-                name='Curva de Densidade',
-                line=dict(color='red', width=3),
-                yaxis='y'
-            )
-        )
-        
         grafico_hist.update_layout(
             title_x=0.1,
             plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            showlegend=True
+            paper_bgcolor='rgba(0,0,0,0)'
         )
-        
         st.plotly_chart(grafico_hist, use_container_width=True)
     else:
-        st.warning("Nenhum dado para exibir no gráfico de distribuição.")
+        st.warning("Nenhum dado para exibir no gráfico de distribuição!")
 
 col_graf3, col_graf4 = st.columns(2)
 
@@ -223,7 +187,7 @@ with col_graf3:
         )
         st.plotly_chart(grafico_remoto, use_container_width=True)
     else:
-        st.warning("Nenhum dado para exibir no gráfico dos tipos de trabalho.")
+        st.warning("Nenhum dado para exibir no gráfico dos tipos de trabalho!")
 
 with col_graf4:
     if not df_filtrado.empty:
@@ -234,7 +198,7 @@ with col_graf4:
                 media_ds_pais,
                 locations='residencia_iso3',
                 color='usd',
-                color_continuous_scale='rdylgn',  # Volta à cor original
+                color_continuous_scale='rdylgn',  # Aqui se muda a paleta de cores do gráfico
                 title="Salário Médio de Cientista de Dados por País",
                 labels={'usd': "Salário Médio Anual (USD)", 'residencia_iso3': "País"}
             )
@@ -244,9 +208,9 @@ with col_graf4:
             )
             st.plotly_chart(grafico_paises, use_container_width=True)
         else:
-            st.warning("Nenhum dado de Data Scientist para exibir no mapa.")
+            st.warning("Nenhum dado de Data Scientist para exibir no mapa!")
     else:
-        st.warning("Nenhum dado para exibir no gráfico de países.")
+        st.warning("Nenhum dado para exibir no gráfico de países!")
 
 # --- Tabela de Dados Detalhados ---
 st.subheader("Dados Detalhados")
