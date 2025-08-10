@@ -3,12 +3,51 @@ import pandas as pd
 import plotly.express as px
 
 # --- Configuração da Página ---
-# Define o título da página, o ícone e o layout para ocupar a largura inteira.
 st.set_page_config(
     page_title="Dashboard de Salários na Área de Dados",
     page_icon="📊",
     layout="wide",
 )
+
+# --- CSS Personalizado para Cores ---
+st.markdown("""
+<style>
+    /* Mudando cor dos multiselect tags de vermelho para azul */
+    .stMultiSelect > div > div > div > div {
+        background-color: #1f77b4 !important;
+        color: white !important;
+    }
+
+    /* Mudando cor dos botões X dos tags */
+    .stMultiSelect > div > div > div > div > span {
+        color: white !important;
+    }
+
+    /* Alternativa: Mudando para verde */
+    /*
+    .stMultiSelect > div > div > div > div {
+        background-color: #2E8B57 !important;
+        color: white !important;
+    }
+    */
+
+    /* Estilo para o título principal */
+    .main-title {
+        color: #1f77b4;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    /* Estilo para métricas */
+    [data-testid="metric-container"] {
+        background-color: #f0f2f6;
+        border: 1px solid #e0e0e0;
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style>
+""", unsafe_allow_html=True)
 
 df = pd.read_csv("dados-imersao-final.csv")
 
@@ -32,7 +71,6 @@ tamanhos_disponiveis = sorted(df['tamanho_empresa'].unique())
 tamanhos_selecionados = st.sidebar.multiselect("Tamanho da Empresa", tamanhos_disponiveis, default=tamanhos_disponiveis)
 
 # --- Filtragem do DataFrame ---
-# O dataframe principal é filtrado com base nas seleções feitas na barra lateral.
 df_filtrado = df[
     (df['ano'].isin(anos_selecionados)) &
     (df['senioridade'].isin(senioridades_selecionadas)) &
@@ -41,11 +79,11 @@ df_filtrado = df[
 ]
 
 # --- Conteúdo Principal ---
-st.title("🎲 Dashboard de Análise de Salários na Área de Dados")
+st.markdown('<h1 class="main-title">🎲 Dashboard de Análise de Salários na Área de Dados</h1>', unsafe_allow_html=True)
 st.markdown("Explore os dados salariais na área de dados nos últimos anos. Utilize os filtros à esquerda para refinar sua análise.")
 
 # --- Métricas Principais (KPIs) ---
-st.subheader("Métricas gerais (Salário anual em USD)")
+st.subheader("Métricas Gerais (Salário Anual em USD)")
 
 if not df_filtrado.empty:
     salario_medio = df_filtrado['usd'].mean()
@@ -53,7 +91,7 @@ if not df_filtrado.empty:
     total_registros = df_filtrado.shape[0]
     cargo_mais_frequente = df_filtrado["cargo"].mode()[0]
 else:
-    salario_medio, salario_maximo, total_registros, cargo_mais_frequente = 0, 0, 0, "" # corrigido
+    salario_medio, salario_maximo, total_registros, cargo_mais_frequente = 0, 0, 0, ""
 
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Salário Médio", f"${salario_medio:,.0f}")
@@ -71,15 +109,36 @@ col_graf1, col_graf2 = st.columns(2)
 with col_graf1:
     if not df_filtrado.empty:
         top_cargos = df_filtrado.groupby('cargo')['usd'].mean().nlargest(10).sort_values(ascending=True).reset_index()
+
+        # Paleta de cores personalizada para o gráfico de barras
+        cores_personalizadas = px.colors.qualitative.Set3
+
         grafico_cargos = px.bar(
             top_cargos,
             x='usd',
             y='cargo',
             orientation='h',
-            title="Top 10 cargos por salário médio",
-            labels={'usd': "Média Salarial Anual (USD)", 'cargo': ''}
+            title="Top 10 Cargos por Salário Médio",
+            labels={'usd': "Média Salarial Anual (USD)", 'cargo': ''},
+            color='cargo',
+            color_discrete_sequence=cores_personalizadas
         )
-        grafico_cargos.update_layout(title_x=0.1, yaxis={'categoryorder':'total ascending'})
+
+        # Melhorando o layout
+        grafico_cargos.update_layout(
+            title_x=0.1,
+            yaxis={'categoryorder':'total ascending'},
+            showlegend=False,  # Remove a legenda para ficar mais limpo
+            plot_bgcolor='rgba(0,0,0,0)',  # Fundo transparente
+            paper_bgcolor='rgba(0,0,0,0)'
+        )
+
+        # Personalizando as barras
+        grafico_cargos.update_traces(
+            hovertemplate='<b>%{y}</b><br>Salário Médio: $%{x:,.0f}<extra></extra>',
+            textposition='none'
+        )
+
         st.plotly_chart(grafico_cargos, use_container_width=True)
     else:
         st.warning("Nenhum dado para exibir no gráfico de cargos.")
@@ -92,8 +151,13 @@ with col_graf2:
             nbins=30,
             title="Distribuição de Salários Anuais",
             labels={'usd': "Faixa Salarial (USD)", 'count': "Frequência"},
+            color_discrete_sequence=['#1f77b4']  # Azul consistente
         )
-        grafico_hist.update_layout(title_x=0.1)
+        grafico_hist.update_layout(
+            title_x=0.1,
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)'
+        )
         st.plotly_chart(grafico_hist, use_container_width=True)
     else:
         st.warning("Nenhum dado para exibir no gráfico de distribuição.")
@@ -104,15 +168,24 @@ with col_graf3:
     if not df_filtrado.empty:
         remoto_contagem = df_filtrado['remoto'].value_counts().reset_index()
         remoto_contagem.columns = ['tipo_trabalho', 'quantidade']
+
+        # Cores personalizadas para o gráfico de pizza
+        cores_pizza = ['#1f77b4', '#ff7f0e', '#2ca02c']
+
         grafico_remoto = px.pie(
             remoto_contagem,
             names='tipo_trabalho',
             values='quantidade',
-            title='Proporção dos tipos de trabalho',
-            hole=0.5
+            title='Proporção dos Tipos de Trabalho',
+            hole=0.5,
+            color_discrete_sequence=cores_pizza
         )
         grafico_remoto.update_traces(textinfo='percent+label')
-        grafico_remoto.update_layout(title_x=0.1)
+        grafico_remoto.update_layout(
+            title_x=0.1,
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)'
+        )
         st.plotly_chart(grafico_remoto, use_container_width=True)
     else:
         st.warning("Nenhum dado para exibir no gráfico dos tipos de trabalho.")
@@ -120,18 +193,26 @@ with col_graf3:
 with col_graf4:
     if not df_filtrado.empty:
         df_ds = df_filtrado[df_filtrado['cargo'] == 'Data Scientist']
-        media_ds_pais = df_ds.groupby('residencia_iso3')['usd'].mean().reset_index()
-        grafico_paises = px.choropleth(media_ds_pais,
-            locations='residencia_iso3',
-            color='usd',
-            color_continuous_scale='rdylgn',
-            title="Salário Médio de Cientista de Dados por País",
-            labels={'usd': "Salário Médio Anual (USD)", 'residencia_iso3': "País"})
-        grafico_paises.update_layout(title_x=0.1)
-        st.plotly_chart(grafico_paises, use_container_width=True)
+        if not df_ds.empty:
+            media_ds_pais = df_ds.groupby('residencia_iso3')['usd'].mean().reset_index()
+            grafico_paises = px.choropleth(
+                media_ds_pais,
+                locations='residencia_iso3',
+                color='usd',
+                color_continuous_scale='rdylgn',  # Aqui se muda a paleta de cores do gráfico
+                title="Salário Médio de Cientista de Dados por País",
+                labels={'usd': "Salário Médio Anual (USD)", 'residencia_iso3': "País"}
+            )
+            grafico_paises.update_layout(
+                title_x=0.1,
+                geo=dict(showframe=False, showcoastlines=True)
+            )
+            st.plotly_chart(grafico_paises, use_container_width=True)
+        else:
+            st.warning("Nenhum dado de Data Scientist para exibir no mapa.")
     else:
         st.warning("Nenhum dado para exibir no gráfico de países.")
 
 # --- Tabela de Dados Detalhados ---
 st.subheader("Dados Detalhados")
-st.dataframe(df_filtrado)
+st.dataframe(df_filtrado, use_container_width=True)
