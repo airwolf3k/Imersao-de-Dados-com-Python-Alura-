@@ -12,39 +12,38 @@ st.set_page_config(
 # --- CSS Personalizado para Cores ---
 st.markdown("""
 <style>
-    /* Mudando cor dos multiselect tags de vermelho para azul */
+    /* APENAS mudando cor dos tags selecionados de vermelho para azul */
+    /* Mantendo o fundo da caixa original (preto/escuro) */
     .stMultiSelect > div > div > div > div {
         background-color: #1f77b4 !important;
         color: white !important;
+        border-color: #1f77b4 !important;
     }
-
+    
     /* Mudando cor dos botões X dos tags */
     .stMultiSelect > div > div > div > div > span {
         color: white !important;
     }
-
-    /* Alternativa: Mudando para verde */
-    /*
-    .stMultiSelect > div > div > div > div {
-        background-color: #2E8B57 !important;
-        color: white !important;
+    
+    /* Mantendo o fundo da caixa de seleção escuro */
+    .stMultiSelect > div > div {
+        background-color: transparent !important;
     }
-    */
-
+    
     /* Estilo para o título principal */
     .main-title {
         color: #1f77b4;
         text-align: center;
         font-weight: bold;
     }
-
-    /* Estilo para métricas */
+    
+    /* Estilo para métricas - adaptado para tema escuro */
     [data-testid="metric-container"] {
-        background-color: #f0f2f6;
-        border: 1px solid #e0e0e0;
+        background-color: rgba(28, 131, 225, 0.1);
+        border: 1px solid rgba(28, 131, 225, 0.3);
         padding: 1rem;
         border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 </style>
 """, unsafe_allow_html=True)
